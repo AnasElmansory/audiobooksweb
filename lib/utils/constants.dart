@@ -1,0 +1,9 @@
+const baseUrl = "https://ok2codebooks.herokuapp.com";
+const kGooglePassword = "GoogleProviderPassword";
+const kFacebookPassword = "FacebookProviderPassword";
+const kNotFound = 'Not Found!';
+const kNotAuthorized = 'UnAuthorized/ password doesn\'t match';
+const kBadParameters = 'Bad/Maleformed Parameters';
+const kConflictResourses = 'resourse already exists!';
+const kServerError = 'Server_Error';
+const kForbidden = 'Forbidden';
