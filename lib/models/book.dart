@@ -1,11 +1,13 @@
 import 'dart:convert';
 
+import 'package:audiobooks/models/model.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:audiobooks/models/chapter.dart';
 
-class Book {
+class Book extends Model {
   final String rowId;
+  @override
   final String id;
   final String title;
   final String bookAuthor;
@@ -15,7 +17,7 @@ class Book {
   final String countryOfOrigin;
   final String readability;
   final String wordCount;
-  final String genre;
+  final BookGenre genre;
   final String keywords;
   final String textHint;
   final String source;
@@ -55,7 +57,7 @@ class Book {
     String countryOfOrigin,
     String readability,
     String wordCount,
-    String genre,
+    BookGenre genre,
     String keywords,
     String textHint,
     String source,
@@ -98,7 +100,7 @@ class Book {
       'countryOfOrigin': countryOfOrigin,
       'readability': readability,
       'wordCount': wordCount,
-      'genre': genre,
+      'genre': genre.toString(),
       'keywords': keywords,
       'textHint': textHint,
       'source': source,
@@ -111,8 +113,8 @@ class Book {
 
   factory Book.fromMap(Map<String, dynamic> map) {
     return Book(
-      rowId: map['row_id'],
-      id: map['book_id_book'],
+      rowId: map['row_id'].toString(),
+      id: map['book_id_book'].toString(),
       title: map['book_name'],
       bookAuthor: map['book_author'],
       bookImage: map['book_link_image'],
@@ -121,7 +123,7 @@ class Book {
       countryOfOrigin: map['book_country_of_origin'],
       readability: map['book_readability'],
       wordCount: map['book_word_count'],
-      genre: map['book_genre'],
+      genre: mapBookGenre(map['book_genre']),
       keywords: map['book_keywords'],
       textHint: map['book_text_hint_book'],
       source: map['book_source'],
@@ -186,4 +188,73 @@ class Book {
         laoi.hashCode ^
         chapters.hashCode;
   }
+}
+
+BookGenre mapBookGenre(String bookGenreString) {
+  if (bookGenreString == 'Genre: Fantasy')
+    return BookGenre.FANTASY;
+  else if (bookGenreString == 'Genre: Poetry')
+    return BookGenre.POETRY;
+  else if (bookGenreString == 'Genre: Informational')
+    return BookGenre.INFORMATIONAL;
+  else if (bookGenreString == 'Genre: Horror')
+    return BookGenre.HORROR;
+  else if (bookGenreString == 'Genre: Romance')
+    return BookGenre.ROMANCE;
+  else if (bookGenreString == 'Genre: Adventure')
+    return BookGenre.ADVENTURE;
+  else if (bookGenreString == 'Genre: Fairy Tale/Folk Tale')
+    return BookGenre.FAIRY_TAILE_FOLK_TALE;
+  else if (bookGenreString == 'Genre: Realism')
+    return BookGenre.REALISM;
+  else if (bookGenreString == 'Genre: Gothic')
+    return BookGenre.GOTHIC;
+  else if (bookGenreString == 'Genre: Memoir')
+    return BookGenre.MEMOIR;
+  else if (bookGenreString == 'Genre: Science Fiction')
+    return BookGenre.SCIENCE_FICTION;
+  else if (bookGenreString == 'Genre: Epic')
+    return BookGenre.EPIC;
+  else if (bookGenreString == 'Genre: Essay')
+    return BookGenre.ESSAY;
+  else if (bookGenreString == 'Genre: Tragedy')
+    return BookGenre.TRAGEDY;
+  else if (bookGenreString == 'Genre: Satire')
+    return BookGenre.SATIRE;
+  else if (bookGenreString == 'Genre: Historical Fiction')
+    return BookGenre.HISTORICAL_FICTION;
+  else if (bookGenreString == 'Genre: Nursery Rhyme')
+    return BookGenre.NURSERY_RHYME;
+  else if (bookGenreString == 'Genre: Mystery')
+    return BookGenre.MYSTERY;
+  else if (bookGenreString == 'Genre: Speech')
+    return BookGenre.SPEECH;
+  else if (bookGenreString == 'Genre: History')
+    return BookGenre.HISTORY;
+  else
+    return BookGenre.UNKNOWN;
+}
+
+enum BookGenre {
+  UNKNOWN,
+  FANTASY,
+  HORROR,
+  MYSTERY,
+  ADVENTURE,
+  SCIENCE_FICTION,
+  HISTORICAL_FICTION,
+  INFORMATIONAL,
+  FAIRY_TAILE_FOLK_TALE,
+  SATIRE,
+  ROMANCE,
+  GOTHIC,
+  TRAGEDY,
+  REALISM,
+  MEMOIR,
+  ESSAY,
+  POETRY,
+  NURSERY_RHYME,
+  EPIC,
+  SPEECH,
+  HISTORY,
 }

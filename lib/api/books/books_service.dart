@@ -9,9 +9,9 @@ import 'package:flutter/foundation.dart';
 import 'package:fluttertoast/fluttertoast_web.dart';
 
 class BooksService {
-  final Dio dio;
+  final Dio _dio;
 
-  BooksService(this.dio);
+  const BooksService(this._dio);
 
   Map<String, dynamic> _constructHeaders(String token, AuthProviders provider) {
     final providerString = StringBuffer();
@@ -26,9 +26,8 @@ class BooksService {
     };
   }
 
-  Future<List<Book>> getBooks({
-    @required String token,
-    @required AuthProviders provider,
+  Future<List<Book>> getBooks(
+    String token, {
     int page,
     int pageSize,
   }) async {
@@ -37,17 +36,26 @@ class BooksService {
       'pageSize': pageSize,
     };
     try {
-      final response = await dio.get(
+      final response = await _dio.get(
         baseUrl + '/books',
         queryParameters: queryParameters,
-        options: Options(headers: _constructHeaders(token, provider)),
+        options: Options(
+          headers: _constructHeaders(
+            token,
+            await getAuthProvider(),
+          ),
+        ),
       );
+
       final books = (response.data as List)
-          .map<Book>((book) => Book.fromJson(jsonEncode(book)))
+          .map<Book>((book) => Book.fromMap(book))
           .toList();
       return books;
     } on DioError catch (e) {
       await FluttertoastWebPlugin().addHtmlToast(msg: '${e.response.data}');
+      return null;
+    } catch (er) {
+      await FluttertoastWebPlugin().addHtmlToast(msg: '${er.toString()}');
       return null;
     }
   }
@@ -55,18 +63,14 @@ class BooksService {
   Future<Book> getBookById(
     int id, {
     @required String token,
-    @required AuthProviders provider,
   }) async {
-    final headers = _constructHeaders(token, provider);
-    print(headers);
+    final headers = _constructHeaders(token, await getAuthProvider());
     try {
-      final response = await dio.get(
+      final response = await _dio.get(
         baseUrl + '/books/$id',
         options: Options(headers: headers),
       );
-      print(response.data);
       final book = response.constructBook();
-      print("book: $book");
       return book;
     } on DioError catch (e) {
       await FluttertoastWebPlugin().addHtmlToast(msg: '${e.response.data}');

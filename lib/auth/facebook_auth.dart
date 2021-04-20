@@ -52,7 +52,6 @@ class FacebookAuthentication extends IAuth {
     final user = await _usersService.saveUser(
       userData,
       accessToken.token,
-      provider,
     );
     return user;
   }
@@ -72,7 +71,7 @@ class FacebookAuthentication extends IAuth {
   Future<User> getCurrentUser() async {
     if (!await isLoggedIn()) return null;
     final token = await getToken();
-    final user = await _usersService.getMe(token, provider);
+    final user = await _usersService.getMe(token);
     return user;
   }
 

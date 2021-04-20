@@ -1,7 +1,12 @@
 import 'package:audiobooks/api/books/books_service.dart';
+import 'package:audiobooks/api/reviews/reviews_service.dart';
 import 'package:audiobooks/api/users/users_service.dart';
 import 'package:audiobooks/auth/facebook_auth.dart';
 import 'package:audiobooks/auth/google_auth.dart';
+import 'package:audiobooks/providers/books_provider.dart';
+import 'package:audiobooks/providers/page_view_provider.dart';
+import 'package:audiobooks/providers/reviews_provider.dart';
+import 'package:audiobooks/providers/user_provider.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:get_it/get_it.dart';
@@ -12,11 +17,18 @@ import 'package:audiobooks/api/auth/i_api_auth.dart';
 final getIt = GetIt.instance;
 
 void initGet() {
-  // getIt.registerFactory<BooksProvider>(
-  //     () => BooksProvider(getIt<BooksService>()));
+  getIt.registerFactory<PageViewProvider>(() => PageViewProvider());
+  getIt.registerFactory<BooksProvider>(
+      () => BooksProvider(getIt<BooksService>()));
+  getIt.registerFactory<ReviewsProvider>(
+      () => ReviewsProvider(getIt<ReviewsService>()));
+  getIt.registerFactory<UserProvider>(
+      () => UserProvider.empty(getIt<UsersService>()));
 
   getIt.registerLazySingleton<UsersService>(() => UsersService(getIt<Dio>()));
   getIt.registerLazySingleton<BooksService>(() => BooksService(getIt<Dio>()));
+  getIt.registerLazySingleton<ReviewsService>(
+      () => ReviewsService(getIt<Dio>()));
   getIt.registerLazySingleton<Dio>(() => Dio());
 
   getIt.registerLazySingleton<GoogleAuth>(() => GoogleAuth(

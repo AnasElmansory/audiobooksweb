@@ -12,8 +12,6 @@ abstract class IAuth {
   Future<void> signOut();
 }
 
-enum AuthProviders {
-  GOOGLE,
-  FACEBOOK,
-  API,
-}
+enum AuthProviders { GOOGLE, FACEBOOK, API }
+
+enum AuthMode { Register, Login }

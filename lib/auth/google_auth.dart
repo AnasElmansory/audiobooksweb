@@ -5,8 +5,8 @@ import 'package:audiobooks/auth/i_auth.dart';
 import 'package:audiobooks/models/auth_data.dart';
 import 'package:audiobooks/models/user.dart';
 import 'package:audiobooks/utils/constants.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_login/flutter_login.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fluttertoast/fluttertoast_web.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -19,10 +19,12 @@ class GoogleAuth extends IAuth {
 
   @override
   Future<User> signIn([LoginData loginData]) async {
-    final account = await _googleSignIn.signIn();
-    if (account == null) {
+    GoogleSignInAccount account;
+    try {
+      account = await _googleSignIn.signIn();
+    } on PlatformException catch (error) {
       await FluttertoastWebPlugin().addHtmlToast(
-        msg: GoogleSignIn.kSignInCanceledError,
+        msg: 'error: ${error.code}',
       );
       return null;
     }
@@ -44,7 +46,6 @@ class GoogleAuth extends IAuth {
     final user = await _usersService.saveUser(
       userData,
       authData.idToken,
-      provider,
     );
     return user;
   }
@@ -66,7 +67,7 @@ class GoogleAuth extends IAuth {
       return null;
     }
     final token = await getToken();
-    final user = await _usersService.getMe(token, provider);
+    final user = await _usersService.getMe(token);
     return user;
   }
 

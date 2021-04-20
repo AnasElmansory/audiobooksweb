@@ -3,12 +3,13 @@ import 'dart:convert';
 import 'package:audiobooks/auth/i_auth.dart';
 import 'package:audiobooks/models/user.dart';
 import 'package:audiobooks/utils/constants.dart';
+import 'package:audiobooks/utils/helper.dart';
 import 'package:dio/dio.dart';
 import 'package:fluttertoast/fluttertoast_web.dart';
 
 class UsersService {
-  final Dio dio;
-  UsersService(this.dio);
+  final Dio _dio;
+  const UsersService(this._dio);
 
   Map<String, dynamic> constructHeaders(String token, AuthProviders provider) {
     final providerString = StringBuffer();
@@ -23,33 +24,44 @@ class UsersService {
     };
   }
 
-  Future<User> getMe(
-    String token,
-    AuthProviders provider,
-  ) async {
+  Future<User> getMe(String token) async {
     try {
-      final response = await dio.get(
+      final response = await _dio.get(
         baseUrl + '/auth/me',
-        options: Options(headers: constructHeaders(token, provider)),
+        options: Options(
+          headers: constructHeaders(
+            token,
+            await getAuthProvider(),
+          ),
+        ),
       );
-      return User.fromJson(json.encode(response.data));
+      return User.fromMap(response.data);
     } on DioError catch (e) {
       await FluttertoastWebPlugin().addHtmlToast(msg: '${e.response.data}');
+      return null;
+    } catch (anotherError) {
+      await FluttertoastWebPlugin().addHtmlToast(msg: '$anotherError');
       return null;
     }
   }
 
   Future<List<User>> getUsers(
-    String token,
-    AuthProviders provider,
-  ) async {
+    String token, {
+    int page,
+  }) async {
     try {
-      final response = await dio.get(
+      final response = await _dio.get(
         baseUrl + '/users',
-        options: Options(headers: constructHeaders(token, provider)),
+        queryParameters: {'page': page},
+        options: Options(
+          headers: constructHeaders(
+            token,
+            await getAuthProvider(),
+          ),
+        ),
       );
       final users = (response.data as List)
-          .map<User>((user) => User.fromJson(user))
+          .map<User>((user) => User.fromMap(user))
           .toList();
       return users;
     } on DioError catch (e) {
@@ -61,14 +73,18 @@ class UsersService {
   Future<User> getUsersById(
     String id,
     String token,
-    AuthProviders provider,
   ) async {
     try {
-      final response = await dio.get(
+      final response = await _dio.get(
         baseUrl + '/users/$id',
-        options: Options(headers: constructHeaders(token, provider)),
+        options: Options(
+          headers: constructHeaders(
+            token,
+            await getAuthProvider(),
+          ),
+        ),
       );
-      return User.fromJson(json.encode(response.data));
+      return User.fromMap(response.data);
     } on DioError catch (e) {
       await FluttertoastWebPlugin().addHtmlToast(msg: '${e.response.data}');
       return null;
@@ -78,17 +94,21 @@ class UsersService {
   Future<User> saveUser(
     User user,
     String token,
-    AuthProviders provider,
   ) async {
     final body = json.encode(user.toMap());
     try {
-      final response = await dio.post(
+      final response = await _dio.post(
         baseUrl + '/users',
         data: body,
-        options: Options(headers: constructHeaders(token, provider)),
+        options: Options(
+          headers: constructHeaders(
+            token,
+            await getAuthProvider(),
+          ),
+        ),
       );
 
-      return User.fromJson(json.encode(response.data));
+      return User.fromMap(response.data);
     } on DioError catch (e) {
       await FluttertoastWebPlugin().addHtmlToast(msg: '${e.response.data}');
       return null;

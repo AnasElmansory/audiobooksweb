@@ -1,14 +1,17 @@
 import 'dart:convert';
 
-class User {
+import 'package:audiobooks/models/model.dart';
+
+class User extends Model {
   final String mongoId;
+  @override
   final String id;
   final String email;
   final String username;
   final String password;
   final bool isAdmin;
 
-  const User({
+  User({
     this.mongoId,
     this.id,
     this.email,

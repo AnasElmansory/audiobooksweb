@@ -1,47 +1,49 @@
-import 'dart:collection';
-
 import 'package:audiobooks/api/books/books_service.dart';
-import 'package:audiobooks/auth/i_auth.dart';
-import 'package:audiobooks/get_it.dart';
 import 'package:audiobooks/models/book.dart';
 import 'package:audiobooks/providers/user_provider.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:audiobooks/utils/helper.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
 class BooksProvider extends ChangeNotifier {
-  final BooksService _booksService = getIt<BooksService>();
-  final BuildContext _context;
-  final AuthProviders _authProvider;
-  BooksProvider(this._context, this._authProvider);
+  final BooksService _booksService;
+  BooksProvider(this._booksService);
 
-  Set _books = Set();
-  Set get books => this._books;
-  set books(Set value) {
-    _books.addAll(value);
+  Set<Book> _books = Set<Book>();
+  Set<Book> get books => this._books;
+  set books(Set<Book> value) {
+    this._books.addAll(value);
     notifyListeners();
   }
 
-  Future<List<Book>> getBooks() async {
-    final userProvider = _context.read<UserProvider>();
+  Book oneBook(String bookId) => _books.singleWhere((bk) => bk.id == bookId);
+
+  Future<List<Book>> getBooks({int page, int pageSize}) async {
+    final userProvider = Get.context.read<UserProvider>();
     final token = await userProvider.getToken();
     final result = await _booksService.getBooks(
-      token: token,
-      provider: _authProvider,
+      token,
+      page: page,
+      pageSize: pageSize,
     );
     books = result.toSet();
-    return this.books.toList();
+    return result;
   }
 
-  Future<Book> getBookById(
-    int id,
-  ) async {
-    final userProvider = _context.read<UserProvider>();
+  Future<Book> getBookById(int id) async {
+    final userProvider = Get.context.read<UserProvider>();
     final token = await userProvider.getToken();
     final book = await _booksService.getBookById(
       id,
       token: token,
-      provider: _authProvider,
     );
+    final updatedBook = books
+        .firstWhere((bk) => bk.id == book.id)
+        .copyWith(chapters: book.chapters);
+
+    books.update(updatedBook);
+    notifyListeners();
     return book;
   }
 }

@@ -37,15 +37,20 @@ class IApiAuth {
         baseUrl + '/auth/me',
         options: Options(headers: setupHeaders(token)),
       );
-      return User.fromJson(json.encode(result.data));
+      final user = User.fromMap(result?.data);
+      return user;
     } on DioError catch (e) {
       await FluttertoastWebPlugin().addHtmlToast(msg: '${e.response.data}');
+      return null;
+    } catch (anotherError) {
+      await FluttertoastWebPlugin().addHtmlToast(msg: '$anotherError');
       return null;
     }
   }
 
   Future<User> login(LoginData loginData) async {
     final prebody = {
+      'id': 'dummyId',
       'email': loginData.name,
       'password': loginData.password,
     };
@@ -71,7 +76,7 @@ class IApiAuth {
         data: data,
       );
       await saveAuthData(response.data['token']);
-      return User.fromJson(json.encode(response.data['user']));
+      return User.fromJson(json.encode(response.data['mongoUser']));
     } on DioError catch (e) {
       await FluttertoastWebPlugin().addHtmlToast(msg: '${e.response.data}');
       return null;
