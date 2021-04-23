@@ -14,7 +14,7 @@ class Chapter {
     this.title,
     this.author,
     this.textHint,
-    this.contentAsHtml,
+    this.contentAsHtml = nullChapterHtml,
     this.audioLink,
     this.pdfLink,
     this.wordCount,
@@ -105,3 +105,5 @@ class Chapter {
         wordCount.hashCode;
   }
 }
+
+const nullChapterHtml = "<h1>Empty Chapter</h1>";

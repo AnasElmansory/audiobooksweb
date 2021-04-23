@@ -1,6 +1,11 @@
 import 'package:audiobooks/models/review.dart';
+import 'package:audiobooks/providers/books_provider.dart';
 import 'package:audiobooks/providers/reviews_provider.dart';
+import 'package:audiobooks/providers/user_provider.dart';
+import 'package:audiobooks/widgets/review_form_widget.dart';
+import 'package:circular_profile_avatar/circular_profile_avatar.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:provider/provider.dart';
@@ -12,32 +17,26 @@ class ReviewsPage extends StatefulWidget {
 }
 
 class _ReviewsPageState extends State<ReviewsPage> {
-  final _pagingController = PagingController<int, Review>(firstPageKey: 1);
-
   @override
   void initState() {
-    _handleReviewsPagination(_pagingController, context);
+    _handleReviewsPagination();
     super.initState();
   }
 
   @override
-  void dispose() {
-    _pagingController?.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final reviewProivder = context.watch<ReviewsProvider>();
     final size = MediaQuery.of(context).size;
     final dividerIndent = size.width * 0.2;
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
         child: PagedListView.separated(
-          pagingController: _pagingController,
+          pagingController: reviewProivder.controller,
           separatorBuilder: (context, index) => Divider(
             indent: dividerIndent,
             endIndent: dividerIndent,
+            height: 0,
           ),
           builderDelegate: PagedChildBuilderDelegate<Review>(
             itemBuilder: (context, review, index) {
@@ -53,44 +52,63 @@ class _ReviewsPageState extends State<ReviewsPage> {
 }
 
 Widget _reviewWidget(Review review) {
+  final reviewProivder = Get.context.watch<ReviewsProvider>();
+  final booksProivder = Get.context.watch<BooksProvider>();
+  final book = booksProivder.oneBook(review.bookId);
+  final user = Get.context.watch<UserProvider>().user;
   return GFListTile(
-    onTap: () {},
-    hoverColor: Colors.blueGrey.shade200,
     titleText: review.username,
-    subtitleText: 'rate: ' + review.rate.toString() + '  ' + '${review.bookId}',
+    subtitleText:
+        'rate: ' + review.rate.toString() + '\nbook: ' + '${review.bookName}',
     description: Text(review.comment),
-    icon: const Icon(Icons.delete, color: Colors.red),
-    avatar: CircleAvatar(
-      radius: 30,
-      backgroundImage: NetworkImage(
-          'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRI4JuatGP6M5_Q0wYSkx2jAVzJff1FBaPYXV7zFbMngh5RV6J7'),
+    avatar: CircularProfileAvatar(
+      review.userAvatar ?? '',
+      errorWidget: (context, url, error) => const Image(
+        image: const AssetImage('asset/images/user_placeholder.png'),
+      ),
+      initialsText: Text('${review.username.capitalizeFirst[0]}'),
+      backgroundColor: Colors.blueGrey,
+    ),
+    icon: GFButtonBar(
+      children: [
+        if (user.id == review.userId)
+          IconButton(
+            icon: const Icon(Icons.edit, color: Colors.grey),
+            onPressed: () async {
+              if (user.id == review.userId)
+                await Get.dialog(
+                  ReviewForm(
+                    book: book,
+                    isEdit: true,
+                    review: review,
+                  ),
+                );
+            },
+          ),
+        if (user.isAdmin)
+          IconButton(
+            icon: const Icon(Icons.delete, color: Colors.red),
+            onPressed: () async => await reviewProivder.deleteReview(review.id),
+          ),
+      ],
     ),
   );
 }
 
-void _handleReviewsPagination(
-  PagingController _pagingController,
-  BuildContext context,
-) async {
-  final reviewsProvider = context.read<ReviewsProvider>();
-  _pagingController.itemList = reviewsProvider.reviews.toList();
-  _pagingController.nextPageKey =
-      ((reviewsProvider.reviews.length / 10) + 1).floor();
-  if (reviewsProvider.reviews.isEmpty) {
-    final users = await reviewsProvider.getReviews();
-    _pagingController.appendPage(users, 2);
-  }
+void _handleReviewsPagination() {
+  final reviewProvider = Get.context.read<ReviewsProvider>();
+  final controller = reviewProvider.controller;
   try {
-    _pagingController.addPageRequestListener((pageKey) async {
-      final reviews = await reviewsProvider.getReviews(page: pageKey);
+    controller.addPageRequestListener((pageKey) async {
+      final reviews = await reviewProvider.getReviews(page: pageKey);
       final isLastPage = reviews.length < 10;
       if (isLastPage) {
-        _pagingController.appendLastPage(reviews);
+        controller.appendLastPage(reviews);
       } else {
-        _pagingController.appendPage(reviews, pageKey + 1);
+        controller.appendPage(reviews, pageKey + 1);
       }
     });
   } catch (error) {
-    _pagingController.error = error;
+    controller.error = error;
   }
 }

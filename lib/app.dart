@@ -21,6 +21,7 @@ class App extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => getIt<ReviewsProvider>()),
       ],
       child: GetMaterialApp(
+        theme: ThemeData(fontFamily: 'Cairo'),
         home: const InitialLoader(),
       ),
     );

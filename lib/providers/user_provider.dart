@@ -4,9 +4,12 @@ import 'package:audiobooks/auth/facebook_auth.dart';
 import 'package:audiobooks/auth/google_auth.dart';
 import 'package:audiobooks/get_it.dart';
 import 'package:audiobooks/models/user.dart';
-import 'package:flutter/material.dart';
 import 'package:audiobooks/auth/i_auth.dart';
+import 'package:audiobooks/utils/helper.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
+import 'package:fluttertoast/fluttertoast_web.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserProvider extends ChangeNotifier {
@@ -22,6 +25,9 @@ class UserProvider extends ChangeNotifier {
       this._auth = getIt<ApiAuth>();
     notifyListeners();
   }
+
+  final _pagingController = PagingController<int, User>(firstPageKey: 1);
+  PagingController<int, User> get controller => this._pagingController;
 
   User _user;
   User get user => this._user;
@@ -69,5 +75,35 @@ class UserProvider extends ChangeNotifier {
     final result = await _usersService.getUsers(token, page: page);
     users = result.toSet();
     return users.toList();
+  }
+
+  Future<User> deleteUser(String userId) async {
+    final token = await getToken();
+    final result = await _usersService.deleteUser(userId, token);
+    if (result != null) {
+      this._users.removeWhere((u) => u.id == result.id);
+      notifyListeners();
+      await _showToast('user has been deleted!');
+    }
+    return result;
+  }
+
+  Future<User> grantAdmin(String userId) async {
+    final token = await getToken();
+    final result = await _usersService.grantAdmin(userId, token);
+    if (result != null) {
+      this.users.update(result);
+      notifyListeners();
+      await _showToast('admin permission granted');
+    }
+    return result;
+  }
+
+  Future<void> _showToast(String message) async =>
+      await FluttertoastWebPlugin().addHtmlToast(msg: message);
+  @override
+  void dispose() {
+    this._pagingController.dispose();
+    super.dispose();
   }
 }

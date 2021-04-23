@@ -114,4 +114,48 @@ class UsersService {
       return null;
     }
   }
+
+  Future<User> grantAdmin(
+    String id,
+    String token,
+  ) async {
+    final data = json.encode({'isAdmin': true});
+    try {
+      final response = await _dio.put(
+        baseUrl + '/users/$id',
+        data: data,
+        options: Options(
+          headers: constructHeaders(
+            token,
+            await getAuthProvider(),
+          ),
+        ),
+      );
+      return User.fromMap(response.data);
+    } on DioError catch (e) {
+      await FluttertoastWebPlugin().addHtmlToast(msg: '${e.response.data}');
+      return null;
+    }
+  }
+
+  Future<User> deleteUser(
+    String id,
+    String token,
+  ) async {
+    try {
+      final response = await _dio.delete(
+        baseUrl + '/users/$id',
+        options: Options(
+          headers: constructHeaders(
+            token,
+            await getAuthProvider(),
+          ),
+        ),
+      );
+      return User.fromMap(response.data);
+    } on DioError catch (e) {
+      await FluttertoastWebPlugin().addHtmlToast(msg: '${e.response.data}');
+      return null;
+    }
+  }
 }

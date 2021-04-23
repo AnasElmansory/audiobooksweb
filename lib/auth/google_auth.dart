@@ -40,6 +40,7 @@ class GoogleAuth extends IAuth {
     final userData = User(
       id: account.id,
       username: account.displayName,
+      avatar: account.photoUrl,
       email: account.email,
       password: kGooglePassword,
     );

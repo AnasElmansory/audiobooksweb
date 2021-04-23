@@ -5,8 +5,10 @@ import 'package:audiobooks/providers/user_provider.dart';
 import 'package:audiobooks/utils/theme.dart';
 import 'package:audiobooks/widgets/menu_item.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:circular_profile_avatar/circular_profile_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:get/get.dart';
 
 class SideBarMenu extends StatefulWidget {
   const SideBarMenu();
@@ -31,6 +33,7 @@ class _SideBarMenuState extends State<SideBarMenu>
   Widget build(BuildContext context) {
     final userProvider = context.watch<UserProvider>();
     final pageProvider = context.watch<PageViewProvider>();
+    final userInitials = userProvider?.user?.username;
     final userNameIsEmail =
         userProvider.user?.email == userProvider.user?.username;
     final size = MediaQuery.of(context).size;
@@ -55,9 +58,16 @@ class _SideBarMenuState extends State<SideBarMenu>
                   flex: 2,
                   child: UserAccountsDrawerHeader(
                     decoration: BoxDecoration(color: Colors.blueGrey.shade200),
-                    currentAccountPicture: CircleAvatar(
-                      backgroundImage: NetworkImage(
-                          'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRI4JuatGP6M5_Q0wYSkx2jAVzJff1FBaPYXV7zFbMngh5RV6J7'),
+                    currentAccountPicture: CircularProfileAvatar(
+                      userProvider?.user?.avatar ?? '',
+                      errorWidget: (context, url, error) => const Image(
+                        image: const AssetImage(
+                            'asset/images/user_placeholder.png'),
+                      ),
+                      initialsText: Text(
+                          '${userInitials != null ? userInitials[0] : 'User'}'),
+                      backgroundColor: Colors.blueGrey,
+                      borderColor: Colors.white,
                     ),
                     accountName: AutoSizeText(
                       '${userNameIsEmail ? '' : userProvider.user?.username ?? ""}',
@@ -87,7 +97,9 @@ class _SideBarMenuState extends State<SideBarMenu>
                   child: ListView.separated(
                     separatorBuilder: (context, counter) =>
                         const Divider(height: 2),
-                    itemCount: menuItems.length,
+                    itemCount: (userProvider.user?.isAdmin ?? false)
+                        ? menuItems.length
+                        : menuItems.length - 2,
                     itemBuilder: (BuildContext context, int index) {
                       return Container(
                         child: MenuItemTile(
@@ -104,13 +116,10 @@ class _SideBarMenuState extends State<SideBarMenu>
                 InkWell(
                   onTap: () async {
                     await userProvider.signOut();
-                    final signRoute = MaterialPageRoute(
-                      builder: (_) => const SignPage(),
-                    );
-                    await Navigator.of(context).pushReplacement(signRoute);
+                    await Get.off(const SignPage());
                   },
                   child: const Icon(
-                    Icons.power_settings_new,
+                    Icons.logout,
                     color: Colors.white,
                     size: 40,
                   ),
@@ -120,9 +129,4 @@ class _SideBarMenuState extends State<SideBarMenu>
             ),
     );
   }
-}
-
-Widget _responsiveView(Size size) {
-  final width = size.width;
-  if (width < (width / 3)) {}
 }

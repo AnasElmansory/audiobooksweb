@@ -7,6 +7,7 @@ class User extends Model {
   @override
   final String id;
   final String email;
+  final String avatar;
   final String username;
   final String password;
   final bool isAdmin;
@@ -15,6 +16,7 @@ class User extends Model {
     this.mongoId,
     this.id,
     this.email,
+    this.avatar,
     this.username,
     this.password,
     this.isAdmin = false,
@@ -24,6 +26,7 @@ class User extends Model {
     String mongoId,
     String id,
     String email,
+    String avatar,
     String username,
     String password,
     bool isAdmin,
@@ -32,6 +35,7 @@ class User extends Model {
       mongoId: mongoId ?? this.mongoId,
       id: id ?? this.id,
       email: email ?? this.email,
+      avatar: avatar ?? this.avatar,
       username: username ?? this.username,
       password: password ?? this.password,
       isAdmin: isAdmin ?? this.isAdmin,
@@ -43,6 +47,7 @@ class User extends Model {
       // '_id': mongoId,
       'id': id,
       'email': email,
+      'avatar': avatar,
       'username': username,
       'password': password,
       'isAdmin': isAdmin,
@@ -54,6 +59,7 @@ class User extends Model {
       mongoId: map['_id'],
       id: map['id'],
       email: map['email'],
+      avatar: map['avatar'],
       username: map['username'],
       password: map['password'],
       isAdmin: map['isAdmin'],

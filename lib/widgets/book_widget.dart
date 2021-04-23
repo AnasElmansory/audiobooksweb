@@ -1,5 +1,6 @@
 import 'package:audiobooks/models/book.dart';
 import 'package:audiobooks/pages/one_book_page.dart';
+import 'package:audiobooks/utils/constants.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -17,6 +18,7 @@ class _BookWidgetState extends State<BookWidget>
     with SingleTickerProviderStateMixin {
   AnimationController _controller;
   Book get book => widget.book;
+  String elementId;
   @override
   void initState() {
     _controller = AnimationController(
@@ -56,11 +58,11 @@ class _BookWidgetState extends State<BookWidget>
             width: bookWidth,
           ),
           child: GFCard(
-            elevation: 2,
+            elevation: 5,
             image: Image(
-              image: NetworkImage(
-                'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRI4JuatGP6M5_Q0wYSkx2jAVzJff1FBaPYXV7zFbMngh5RV6J7',
-              ),
+              image: NetworkImage(corsBridge + book.bookImage),
+              errorBuilder: (context, _, __) => const Image(
+                  image: const AssetImage("asset/images/book_placeholder.jpg")),
               fit: BoxFit.cover,
             ),
             buttonBar: GFButtonBar(
@@ -70,13 +72,16 @@ class _BookWidgetState extends State<BookWidget>
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 if (aspectRatio < 0.8)
                   AutoSizeText(
                     book.textHint,
+                    style: const TextStyle(
+                      fontSize: 14,
+                    ),
                     overflow: TextOverflow.ellipsis,
                     maxLines: 3,
                   ),

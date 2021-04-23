@@ -1,16 +1,22 @@
-import 'dart:convert' as convert;
-
 import 'package:audiobooks/models/book.dart';
 import 'package:audiobooks/models/chapter.dart';
+import 'package:audiobooks/models/review.dart';
 import 'package:audiobooks/pages/chapter_page.dart';
 import 'package:audiobooks/providers/books_provider.dart';
+import 'package:audiobooks/providers/reviews_provider.dart';
+import 'package:audiobooks/providers/user_provider.dart';
+import 'package:audiobooks/utils/constants.dart';
+import 'package:audiobooks/widgets/review_form_widget.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:circular_profile_avatar/circular_profile_avatar.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast_web.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:getwidget/components/list_tile/gf_list_tile.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
 
 class OneBookPage extends StatefulWidget {
   final String bookId;
@@ -35,6 +41,13 @@ class _OneBookPageState extends State<OneBookPage> {
     final booksProvider = context.watch<BooksProvider>();
     final book = booksProvider.oneBook(widget.bookId);
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.blue,
+        child: const Icon(Icons.add_comment),
+        onPressed: () async => await Get.dialog(
+          ReviewForm(book: book),
+        ),
+      ),
       appBar: AppBar(
         centerTitle: true,
         title: Text(book.title),
@@ -45,13 +58,21 @@ class _OneBookPageState extends State<OneBookPage> {
           child: Column(
             children: [
               GFListTile(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 titleText: book.title,
                 subtitleText: 'Author: ' + book.bookAuthor,
                 description: AutoSizeText(book.textHint),
-                avatar: Container(
+                avatar: FadeInImage.assetNetwork(
+                  image: corsBridge + book.bookImage,
+                  placeholder: 'asset/images/book_placeholder.jpg',
+                  imageErrorBuilder: (context, _, __) {
+                    return const Image(
+                        image: const AssetImage(
+                            'asset/images/book_placeholder.jpg'));
+                  },
                   height: size.height * .35,
                   width: size.width * 0.2,
-                  color: Colors.blueGrey,
+                  fit: BoxFit.cover,
                 ),
               ),
               Container(
@@ -100,32 +121,96 @@ class _OneBookPageState extends State<OneBookPage> {
 
 Widget _bookDetails(Book book) {
   final bookGenre = book.genre.toString().substring(10);
-  final textStyle = const TextStyle(color: Colors.white, fontSize: 16);
+  final bookLanguage = book.language.split(':');
+  final bookPublishYear = book.publishYear.split(':');
+  final bookReadability = book.readability.split(':');
+  final bookCountryOfOrigin = book.countryOfOrigin.split(':');
+  final bookWordsCount = book.wordCount.split(':');
+  final textStyle = const TextStyle(fontSize: 16);
+  final headerStyle = const TextStyle(
+    color: const Color(0xFF263238),
+    fontWeight: FontWeight.bold,
+    fontSize: 18,
+  );
   return Card(
-    color: Colors.blueGrey,
+    color: Colors.grey.shade200,
     child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(child: AutoSizeText(bookGenre, style: textStyle)),
-          const SizedBox(height: 8),
-          Container(child: AutoSizeText(book.language, style: textStyle)),
-          const SizedBox(height: 8),
-          Container(child: AutoSizeText(book.publishYear, style: textStyle)),
-          const SizedBox(height: 8),
-          Container(child: AutoSizeText(book.wordCount, style: textStyle)),
-          const SizedBox(height: 8),
           Container(
-            child: AutoSizeText(
-              book.countryOfOrigin,
-              style: textStyle,
+            child: AutoSizeText.rich(
+              TextSpan(children: [
+                TextSpan(text: 'Genre: ', style: headerStyle),
+                TextSpan(text: bookGenre, style: textStyle)
+              ]),
             ),
           ),
           const SizedBox(height: 8),
           Container(
-            child: AutoSizeText(
-              "${book.readability}",
-              style: textStyle,
+            child: AutoSizeText.rich(
+              TextSpan(children: [
+                TextSpan(
+                  text: bookLanguage.first,
+                  style: headerStyle,
+                ),
+                const TextSpan(text: ': '),
+                TextSpan(text: bookLanguage.last, style: textStyle)
+              ]),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            child: AutoSizeText.rich(
+              TextSpan(children: [
+                TextSpan(
+                  text: bookPublishYear.first,
+                  style: headerStyle,
+                ),
+                const TextSpan(text: ': '),
+                TextSpan(text: bookPublishYear.last, style: textStyle)
+              ]),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            child: AutoSizeText.rich(
+              TextSpan(children: [
+                TextSpan(
+                  text: bookWordsCount.first,
+                  style: headerStyle,
+                ),
+                const TextSpan(text: ': '),
+                TextSpan(text: bookWordsCount.last, style: textStyle)
+              ]),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            child: AutoSizeText.rich(
+              TextSpan(children: [
+                TextSpan(
+                  text: bookCountryOfOrigin.first,
+                  style: headerStyle,
+                ),
+                const TextSpan(text: ': '),
+                TextSpan(text: bookCountryOfOrigin.last, style: textStyle)
+              ]),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            child: AutoSizeText.rich(
+              TextSpan(children: [
+                TextSpan(
+                  text: bookReadability.first,
+                  style: headerStyle,
+                ),
+                const TextSpan(text: ': '),
+                TextSpan(text: bookReadability[1], style: textStyle),
+                TextSpan(text: ' ' + bookReadability.last, style: textStyle),
+              ]),
             ),
           ),
         ],
@@ -140,17 +225,10 @@ Widget _chapterTile(Chapter chapter) {
     titleText: chapter.title,
     subtitleText: 'Chapter Id: ' + chapter.id,
     description: AutoSizeText(chapter.textHint),
-    avatar: const CircleAvatar(
-      child: const Icon(FontAwesomeIcons.bookReader),
-      backgroundColor: Colors.blueGrey,
-    ),
-    icon: const Icon(
-      Icons.play_arrow,
-      color: Colors.blueGrey,
-    ),
+    icon: const Icon(FontAwesomeIcons.playCircle),
   );
 }
 
 Future<void> _navigateToChapterPage(Chapter chapter) async {
-  return await Get.off(ChapterPage(chapter: chapter));
+  return await Get.to(ChapterPage(chapter: chapter));
 }

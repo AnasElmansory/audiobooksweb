@@ -46,6 +46,7 @@ class FacebookAuthentication extends IAuth {
     final userData = User(
       id: facebookUser['id'],
       email: facebookUser['email'],
+      avatar: facebookUser['picture']['data']['url'],
       username: facebookUser['name'],
       password: kFacebookPassword,
     );

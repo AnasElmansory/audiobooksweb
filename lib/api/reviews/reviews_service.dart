@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:audiobooks/auth/i_auth.dart';
 import 'package:audiobooks/models/review.dart';
 import 'package:audiobooks/utils/constants.dart';
@@ -42,7 +44,7 @@ class ReviewsService {
     }
   }
 
-  Future<Review> getReviewById(String token, int id) async {
+  Future<Review> getReviewById(String token, String id) async {
     try {
       final response = await _dio.get(
         baseUrl + '/reviews/$id',
@@ -94,7 +96,7 @@ class ReviewsService {
     }
   }
 
-  Future<Review> deleteReview(String token, int id) async {
+  Future<Review> deleteReview(String token, String id) async {
     try {
       final response = await _dio.delete(
         baseUrl + '/reviews/$id',
@@ -102,7 +104,7 @@ class ReviewsService {
           headers: await _constructHeaders(token),
         ),
       );
-      final reviewResponse = Review.fromMap(response.data);
+      final reviewResponse = Review.fromJson(json.encode(response.data));
       return reviewResponse;
     } on DioError catch (error) {
       await FluttertoastWebPlugin().addHtmlToast(msg: '${error.response.data}');
