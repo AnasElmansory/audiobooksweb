@@ -31,7 +31,7 @@ class BooksProvider extends ChangeNotifier {
       page: page,
       pageSize: pageSize,
     );
-    books = result.toSet();
+    books = result?.toSet();
     return result;
   }
 

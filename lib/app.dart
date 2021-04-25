@@ -2,8 +2,10 @@ import 'package:audiobooks/get_it.dart';
 import 'package:audiobooks/pages/initial_loader.dart';
 import 'package:audiobooks/providers/books_provider.dart';
 import 'package:audiobooks/providers/page_view_provider.dart';
+import 'package:audiobooks/providers/push_notification_provider.dart';
 import 'package:audiobooks/providers/reviews_provider.dart';
 import 'package:audiobooks/providers/user_provider.dart';
+import 'package:audiobooks/providers/utils_provider.dart';
 
 import 'package:flutter/material.dart';
 import 'package:get/route_manager.dart';
@@ -19,6 +21,9 @@ class App extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => getIt<BooksProvider>()),
         ChangeNotifierProvider(create: (_) => getIt<UserProvider>()),
         ChangeNotifierProvider(create: (_) => getIt<ReviewsProvider>()),
+        ChangeNotifierProvider(create: (_) => getIt<ChapterProvider>()),
+        ChangeNotifierProvider(
+            create: (_) => getIt<PushNotificationProvider>()),
       ],
       child: GetMaterialApp(
         theme: ThemeData(fontFamily: 'Cairo'),

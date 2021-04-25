@@ -35,6 +35,7 @@ class UsersService {
           ),
         ),
       );
+      if (response?.data == null) return null;
       return User.fromMap(response.data);
     } on DioError catch (e) {
       await FluttertoastWebPlugin().addHtmlToast(msg: '${e.response.data}');
@@ -84,6 +85,7 @@ class UsersService {
           ),
         ),
       );
+
       return User.fromMap(response.data);
     } on DioError catch (e) {
       await FluttertoastWebPlugin().addHtmlToast(msg: '${e.response.data}');
@@ -96,6 +98,7 @@ class UsersService {
     String token,
   ) async {
     final body = json.encode(user.toMap());
+    final provider = await getAuthProvider();
     try {
       final response = await _dio.post(
         baseUrl + '/users',
@@ -103,14 +106,17 @@ class UsersService {
         options: Options(
           headers: constructHeaders(
             token,
-            await getAuthProvider(),
+            provider,
           ),
         ),
       );
-
       return User.fromMap(response.data);
     } on DioError catch (e) {
+      print('error: $e');
       await FluttertoastWebPlugin().addHtmlToast(msg: '${e.response.data}');
+      return null;
+    } catch (error) {
+      print('anotherError: $error');
       return null;
     }
   }

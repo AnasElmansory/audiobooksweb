@@ -13,6 +13,9 @@ class SignPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FlutterLogin(
+        theme: LoginTheme(
+          pageColorLight: Colors.blueGrey,
+        ),
         onLogin: (loginData) async => await _handleSign(
               AuthProviders.API,
               loginData: loginData,

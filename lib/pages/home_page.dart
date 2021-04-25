@@ -1,4 +1,5 @@
 import 'package:audiobooks/pages/books_page.dart';
+import 'package:audiobooks/pages/notification_page.dart';
 import 'package:audiobooks/pages/reviews_page.dart';
 import 'package:audiobooks/pages/sign_page.dart';
 import 'package:audiobooks/pages/users_page.dart';
@@ -56,7 +57,7 @@ Widget _buildPageView(PageViewProvider pageViewProvider) {
       const BooksPage(),
       const ReviewsPage(),
       const UsersPage(),
-      if (user?.isAdmin ?? false) const Text('notification'),
+      if (user?.isAdmin ?? false) const NotificationPage(),
     ],
   );
 }

@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:audiobooks/api/users/users_service.dart';
 import 'package:audiobooks/auth/i_auth.dart';
 import 'package:audiobooks/models/auth_data.dart';
@@ -68,6 +66,7 @@ class GoogleAuth extends IAuth {
       return null;
     }
     final token = await getToken();
+    if (token == null) return null;
     final user = await _usersService.getMe(token);
     return user;
   }
@@ -75,7 +74,7 @@ class GoogleAuth extends IAuth {
   @override
   Future<String> getToken() async {
     final account = await _googleSignIn.signInSilently();
-    final auth = await account.authentication;
-    return auth.idToken;
+    final auth = await account?.authentication;
+    return auth?.idToken;
   }
 }

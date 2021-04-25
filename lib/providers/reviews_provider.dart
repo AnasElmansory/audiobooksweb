@@ -30,7 +30,7 @@ class ReviewsProvider extends ChangeNotifier {
       token,
       page: page,
     );
-    reviews = result.toSet();
+    reviews = result?.toSet();
     return result;
   }
 

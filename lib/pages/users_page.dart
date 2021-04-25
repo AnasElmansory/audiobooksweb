@@ -62,6 +62,7 @@ Widget _userWidget(User user) {
     icon: (currentUser.isAdmin)
         ? ButtonBar(
             children: [
+              if(!user.isAdmin)
               IconButton(
                 icon: const Icon(Icons.delete, color: Colors.red),
                 onPressed: () async {
@@ -71,7 +72,7 @@ Widget _userWidget(User user) {
               if (!user.isAdmin)
                 IconButton(
                   icon: const Icon(Icons.admin_panel_settings,
-                      color: Colors.green),
+                      color: Colors.green,),
                   onPressed: () async {
                     await userProvider.grantAdmin(user.id);
                   },

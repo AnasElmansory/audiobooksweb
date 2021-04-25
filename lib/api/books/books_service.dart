@@ -46,7 +46,8 @@ class BooksService {
           ),
         ),
       );
-
+     
+      if (response?.data == null) return null;
       final books = (response.data as List)
           .map<Book>((book) => Book.fromMap(book))
           .toList();
@@ -70,6 +71,7 @@ class BooksService {
         baseUrl + '/books/$id',
         options: Options(headers: headers),
       );
+      if (response?.data == null) return null;
       final book = response.constructBook();
       return book;
     } on DioError catch (e) {
